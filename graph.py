@@ -4,12 +4,15 @@ from collections import defaultdict
 import networkx as nx
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+from typing import Dict, List
+
 
 def euclidean_distance(player1, player2):
     x1, y1 = player1.x, player1.y
     x2, y2 = player2.x, player2.y
     distance = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
     return distance
+
 
 def angle_to(x1, y1, x2, y2):
     # Calculate the differences in coordinates
@@ -28,6 +31,7 @@ def angle_to(x1, y1, x2, y2):
     
     return angle_deg
 
+
 class Player:
     def __init__(self, idx, team, x, y):
         self.id = int(idx)
@@ -36,8 +40,14 @@ class Player:
         self.x = float(x)
         self.y = float(y)
 
+
+    def toString(self) -> str:
+        return f'(Player {self.id}: {self.team}; ({self.x}, {self.y}))'
+
+
     def __str__(self) -> str:
         return f'(Player {self.id}: {self.team}; ({self.x}, {self.y}))'
+
 
 class Goal:
     def __init__(self, idx, side, x, y) -> None:
@@ -46,11 +56,14 @@ class Goal:
         self.x = x
         self.y = y
 
+
     def create_bounds():
         pass
 
+
     def __str__(self) -> str:
         return f'({self.side} Goal ({self.x}, {self.y}))'
+
 
 class Ball:
     def __init__(self, idx, x, y) -> None:
@@ -58,8 +71,14 @@ class Ball:
         self.x = x
         self.y = y
 
+
+    def toString(self) -> str:
+        return f'(Ball: ({self.x}, {self.y}))'
+    
+
     def __str__(self) -> str:
         return f'(Ball: ({self.x}, {self.y}))'
+
 
 class Edge:
     def __init__(self, idx, angle, type, player, target):
@@ -69,11 +88,14 @@ class Edge:
         self.player = player # player
         self.target = target
     
+
     def create_feature_vector(self):
         return [self.angle, self.target, self.type, self]
 
+
     def __str__(self) -> str:
         return f'(Edge: {self.id} {self.angle} {self.type}; {self.player} -> {self.target})'
+
 
 class Graph:
     def __init__(self):
@@ -83,32 +105,33 @@ class Graph:
         self.man_utd_gk = []
         self.goal = []
         self.ball = []
-        # self.vertices = []
         self.edges = defaultdict(list)
         # attacking_classification: scale of 1-7 where 1 is a clear scoring opportunity, 5 is the worst attacking situation, 
         #                           6 is possession of ball in your own half, 7 is defending (ignored), 8 is ignored
         self.attacking_classification: int = None
 
+
     def clear(self):
-        self.man_city = {}
-        self.man_city_gk = []
-        self.man_utd = {}
-        self.man_utd_gk = []
-        self.goal = []
-        self.ball = []
-        # self.vertices = []
-        self.edges = defaultdict(list)
+        self.man_city: Dict[int, Player] = {}
+        self.man_city_gk: List[Player] = []
+        self.man_utd: Dict[int, Player] = {}
+        self.man_utd_gk: List[Player] = []
+        self.goal: List[Goal] = []
+        self.ball: List[Ball] = []
+        self.edges: dict[int, List[Edge]] = defaultdict(list)
         self.attacking_classification: int = None
+
 
     def add_classification(self, classification: int):
         self.attacking_classification = classification
 
+
     def add_player(self, player):
         if player.team == 'man_city':
-            
             self.man_city[player.id] = player
         elif player.team == 'man_utd':
             self.man_utd[player.id] = player
+
 
     def add_gk(self, player):
         if player.team[:-3] == 'man_city':
@@ -116,18 +139,21 @@ class Graph:
         elif player.team[:-3] == 'man_utd':
             self.man_utd_gk = [player]
 
+
     def add_goal(self, goal):
-        if not self.goal:
-            self.goal = [goal]
-        else:
+        if self.goal:
             if goal.side == self.goal[0].side:
                 if goal.side == "right":
                     pass
                 elif goal.side == "left":
                     pass
+        else:
+            self.goal = [goal]
+            
 
     def add_ball(self, ball):
         self.ball = [ball]
+
 
     def add_edges(self, degree):
         idx = 0
@@ -180,6 +206,7 @@ class Graph:
                     angle = angle_to(player.x, player.y, goal.x, goal.y)
                     self.edges[player.id].append(Edge(idx, angle, 'goal', player, goal))
 
+
     def visualize_graph(self):
         G = nx.Graph()
 
@@ -206,16 +233,14 @@ class Graph:
         nx.draw(G, pos=pos, with_labels=True, node_color='lightblue', node_size=1000, font_size=12)
         plt.show()
 
+
     def __str__(self) -> str:
         return "game_state"
     
-    def __eq__(self, value: object) -> bool:        
-        return self.man_city==value.man_city and self.man_city_gk==value.man_city_gk and self.man_utd==value.man_utd and self.man_utd_gk==value.man_utd_gk and self.ball==value.ball
-        # self.man_utd_gk = []
-        # self.goal = []
-        # self.ball = []
-        # # self.vertices = []
-        # self.edges = defaultdict(list)
-        # # attacking_classification: scale of 1-7 where 1 is a clear scoring opportunity, 5 is the worst attacking situation, 
-        # #                           6 is possession of ball in your own half, 7 is defending (ignored), 8 is ignored
-        # self.attacking_classification: int = None
+
+    def __eq__(self, other) -> bool:        
+        return ([(id, player.toString()) for id, player in self.man_city.items()] == [(id, player.toString()) for id, player in other.man_city.items()] 
+                and [player.toString() for player in self.man_city_gk] == [player.toString() for player in other.man_city_gk]
+                and [(id, player.toString()) for id, player in self.man_utd.items()] == [(id, player.toString()) for id, player in other.man_utd.items()]
+                and [player.toString() for player in self.man_utd_gk] == [player.toString() for player in other.man_utd_gk]
+                and [ball.toString() for ball in self.ball] == [ball.toString() for ball in other.ball])
