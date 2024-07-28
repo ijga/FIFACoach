@@ -98,6 +98,22 @@ class Edge:
 
 
 class Graph:
+    """ A graph that represents the on-screen game state
+    
+    This is a bidirectional graph where an edge represents the distance and angle that the destination has in relation to the souce
+
+    Attacking Classifications:
+        1: Best scoring opportunity: shoot the ball now!
+        2: Good scoring opportunity: A few dribbles or a short pass to get a great shot off. Maybe a shot is good here
+        3: Ok scoring opportunity: A long pass or a few short passes to get a good shot off. 
+           If the circumstances are perfect, a shot may be good here
+        4: Minor scoring threat potentially with a long ball
+        5: Possession is in attacking half, no scoring threat
+        6: Possession in own half
+        7: Man City is defending
+        8: Ignored for whatever reason (cutscene, etc)
+    
+    """
     def __init__(self):
         self.man_city = {}
         self.man_city_gk = []
@@ -156,6 +172,7 @@ class Graph:
 
 
     def add_edges(self, degree):
+        self.edges = defaultdict(list)  # resets edges
         idx = 0
         # directed graph
         for player in self.man_city.values():

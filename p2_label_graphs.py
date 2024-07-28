@@ -3,9 +3,14 @@ import pickle
 import cv2
 from graph import Graph
 
+
 GAME = "1"
+FRAMES = 54120
+VID_STRIDE=90
 
 last_classification = 8
+
+
 def label_classification(key) -> int:
     global last_classification
     if key.char == '1':
@@ -40,7 +45,7 @@ listener.start()
 
 with open(f"unlabeled_graphs/game{GAME}.pickle", "rb") as unlabeled:
     with open(f"labeled_graphs/game{GAME}.pickle", "wb") as labeled:
-        for idx in range(1, 54121):
+        for idx in range(1, FRAMES + 1):
             ret, frame = cap.read()
             cv2.imshow('frame',frame)
 
@@ -50,10 +55,10 @@ with open(f"unlabeled_graphs/game{GAME}.pickle", "rb") as unlabeled:
                 break
             cv2.imshow('frame',frame)
                 
-            if idx % 90 == 0:
+            if idx % VID_STRIDE == 0:
                 graph: Graph = pickle.load(unlabeled)
                 graph.add_classification(last_classification)
-                # print(graph)
+                
                 print(f"i: {idx}, {last_classification}, {graph.attacking_classification}")
                 if last_classification == 'q':
                     break
@@ -61,4 +66,3 @@ with open(f"unlabeled_graphs/game{GAME}.pickle", "rb") as unlabeled:
 
 listener.stop()
 listener.join()
-
