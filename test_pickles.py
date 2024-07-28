@@ -2,9 +2,10 @@ import pickle
 from graph import Graph
 
 GAME = "1"
+ITER = "1"
 
 with open(f"unlabeled_graphs/game{GAME}.pickle", "rb") as unlabeled:
-    with open(f"labeled_graphs/game{GAME}.pickle", "rb") as labeled:
+    with open(f"labeled_graphs/game{GAME}_{ITER}.pickle", "rb") as labeled:
         for i in range(650):
             unlabeled_graph: Graph = pickle.load(unlabeled)
             labeled_graph: Graph = pickle.load(labeled)
