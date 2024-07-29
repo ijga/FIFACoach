@@ -3,8 +3,8 @@ import pickle
 import cv2
 from graph import Graph
 
-
 GAME = "1"
+ITER = "1"
 FRAMES = 54120
 VID_STRIDE=90
 
@@ -44,7 +44,7 @@ listener = keyboard.Listener(
 listener.start()
 
 with open(f"unlabeled_graphs/game{GAME}.pickle", "rb") as unlabeled:
-    with open(f"labeled_graphs/game{GAME}.pickle", "wb") as labeled:
+    with open(f"labeled_graphs/game{GAME}_{ITER}.pickle", "wb") as labeled:
         for idx in range(1, FRAMES + 1):
             ret, frame = cap.read()
             cv2.imshow('frame',frame)
