@@ -13,15 +13,15 @@ class Edge:
         self.player = player # player
         self.target = target
     
-
-    def create_feature_vector(self):
-        # returns something in the form [int, int, float, float, int], valid feature vector
-        return [self.player.id, self.target.id, self.angle, self.distance, self.type]
-
+    def create_feature_vector(self) -> str:
+        # returns something in the form float, float, int], valid feature vector
+        return f"{round(self.angle, 2)}, {round(self.distance, 2)}, {self.type}"
+    
+    def create_sparse_adj_matrix_pair(self) -> str:
+        return f"{self.player.id}, {self.target.id}"
 
     def toString(self) -> str:
         return f'(Edge: {self.id} {self.angle} {self.type}; {self.player.toString()} -> {self.target.toString()})'
-
 
     def __str__(self) -> str:
         return f'(Edge: {self.id} {self.angle} {self.type}; {self.player.toString()} -> {self.target.toString()})'

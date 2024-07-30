@@ -8,19 +8,18 @@ class GameObject:
         self.y = y
         self.type = type
 
+    def get_position(self):
+        return self.x, self.y
 
-    def create_feature_vector(self):
+    def create_feature_vector(self) -> str:
         # returns something in the form [int, float, float, int], valid feature vector
-        return [self.id, self.x, self.y, self.type]
-
+        return f"{self.id}, {round(self.x, 2)}, {round(self.y, 2)}, {self.type}"
 
     def __eq__(self, other) -> bool:
         return self.id == other.id and self.x == other.x and self.y == other.y and self.type == other.type
 
-
     def toString(self) -> str:
         return f'- {self.id} {game_object_classification_names[self.type]} :({self.x}, {self.y})-'
-
 
     def __str__(self) -> str:
         return f'- {self.id} {game_object_classification_names[self.type]} :({self.x}, {self.y})-'

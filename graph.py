@@ -6,18 +6,19 @@ from typing import Dict, List
 
 from graph_parts import Ball, Edge, Goal, Player
 from classification_maps import game_object_classification_names, edge_classification_ids
+from graph_parts.game_object import GameObject
 
 
-def euclidean_distance(player, target) -> float:
-    x1, y1 = player.x, player.y
-    x2, y2 = target.x, target.y
+def euclidean_distance(player: GameObject, target: GameObject) -> float:
+    x1, y1 = player.get_position()
+    x2, y2 = target.get_position()
     distance: float = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
     return distance
 
 
-def angle_to(player, target) -> float:
-    x1, y1 = player.x, player.y
-    x2, y2 = target.x, target.y
+def angle_to(player: GameObject, target: GameObject) -> float:
+    x1, y1 = player.get_position()
+    x2, y2 = target.get_position()
 
     # Calculate the differences in coordinates
     dx = x2 - x1
@@ -63,8 +64,7 @@ class Graph:
         self.edges = defaultdict(list)
         # attacking_classification: scale of 1-7 where 1 is a clear scoring opportunity, 5 is the worst attacking situation, 
         #                           6 is possession of ball in your own half, 7 is defending (ignored), 8 is ignored
-        self.attacking_classification: int = None
-
+        self.attacking_classification: int = 8
 
     def clear(self):
         self.man_city: Dict[int, Player] = {}
@@ -74,27 +74,39 @@ class Graph:
         self.goal: List[Goal] = []
         self.ball: List[Ball] = []
         self.edges: dict[int, List[Edge]] = defaultdict(list)
-        self.attacking_classification: int = None
+        self.attacking_classification: int = 8
 
+    def get_all_graph_objects(self) -> List[GameObject]:
+        all_game_objects = [
+            self.man_city.values() +
+            self.man_city_gk +
+            self.man_utd.values() +
+            self.man_utd_gk +
+            self.goal +
+            self.ball
+        ]
+        return all_game_objects
 
+    def get_all_edges(self) -> List[Edge]:
+        return [item for edge_list in self.edges.values() for item in edge_list]
+        
     def add_classification(self, classification: int):
         self.attacking_classification = classification
 
+    def get_classification(self) -> str:
+        return str(self.attacking_classification)
 
     def add_player(self, player):
-        print(player)
         if game_object_classification_names[player.type] == 'man_city':
             self.man_city[player.id] = player
         elif game_object_classification_names[player.type] == 'man_utd':
             self.man_utd[player.id] = player
-
 
     def add_gk(self, player):
         if game_object_classification_names[player.type] == 'man_city_gk':
             self.man_city_gk = [player]
         elif game_object_classification_names[player.type] == 'man_utd_utd':
             self.man_utd_gk = [player]
-
 
     def add_goal(self, goal):
         if self.goal:
@@ -106,10 +118,8 @@ class Graph:
         else:
             self.goal = [goal]
             
-
     def add_ball(self, ball):
         self.ball = [ball]
-
 
     def add_edges(self, degree):
         self.edges = defaultdict(list)  # resets edges
@@ -131,7 +141,6 @@ class Graph:
                 distances.append((distance, target))
 
             sorted_distances = sorted(distances, key=lambda x: x[0])
-            # print(sorted_distances)
 
             for i in range(min(degree, len(sorted_distances))):
                 distance, target = sorted_distances[i]
@@ -171,7 +180,6 @@ class Graph:
                     self.edges[player.id].append(Edge(idx, angle, edge_classification_ids['goal'], player, goal))
                     idx += 1
 
-
     def visualize_graph(self):
         G = nx.Graph()
 
@@ -199,11 +207,9 @@ class Graph:
         plt.show()
         # plt.close(fig)
 
-
     def __str__(self) -> str:
-        return "game_state"
+        return f"Graph: {self.attacking_classification}"
     
-
     def __eq__(self, other) -> bool:        
         return ([(id, player.toString()) for id, player in self.man_city.items()] == [(id, player.toString()) for id, player in other.man_city.items()] 
                 and [player.toString() for player in self.man_city_gk] == [player.toString() for player in other.man_city_gk]

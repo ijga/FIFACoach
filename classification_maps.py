@@ -15,6 +15,8 @@ game_object_classification_names = {
     12: 'x',
 }
 
+# we may want to remap these if model treat numbers are continuous rather than discrete and independent
+
 game_object_classification_ids = {name: id for id, name in game_object_classification_names.items()}
 
 edge_classification_names = {
