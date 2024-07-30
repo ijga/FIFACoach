@@ -1,8 +1,9 @@
 from ultralytics import YOLO
 import numpy as np
 import cv2
-from graph import Graph, Player, Edge, Ball, Goal
-from classes import class_names
+from graph_parts import Ball, Goal, Player
+from graph import Graph
+from classification_maps import game_object_classification_names
 import pickle
 
 GAME = "1"
@@ -42,18 +43,23 @@ def run():
 
             graph = Graph()
             if len(transformed_points) > 0:
-                idx = 0
+                idx: int = 0
                 for type, point in zip(classes, transformed_points[0, :, :]):
                     type = int(type)
                     
-                    if class_names[type] == 'man_city' or class_names[type] == 'man_utd':
-                        graph.add_player(Player(idx, class_names[type], point[0], point[1]))
-                    elif class_names[type] == 'man_city_gk' or class_names[type] == 'man_utd_gk':
-                        graph.add_gk(Player(idx, class_names[type], point[0], point[1]))
-                    elif class_names[type] == 'ball':
-                        graph.add_ball(Ball(idx, point[0], point[1]))
-                    elif class_names[type] == 'left_goal' or class_names[type] == 'right_goal':
-                        graph.add_goal(Goal(idx, type, point[0], point[1]))
+                    game_object_type_name = game_object_classification_names[type]
+
+                    if game_object_type_name == 'man_city' or game_object_type_name == 'man_utd':
+                        graph.add_player(Player(idx, float(point[0]), float(point[1]), type))
+
+                    elif game_object_type_name == 'man_city_gk' or game_object_type_name == 'man_utd_gk':
+                        graph.add_gk(Player(idx, float(point[0]), float(point[1]), type))
+
+                    elif game_object_type_name == 'ball':
+                        graph.add_ball(Ball(idx, float(point[0]), float(point[1]), type))
+
+                    elif game_object_type_name == 'left_goal' or game_object_type_name == 'right_goal':
+                        graph.add_goal(Goal(idx, float(point[0]), float(point[1]), type))
 
                     if type == 4: # man_city
                         cv2.circle(img, (int(point[0]), int(point[1])), 3, (255, 0, 0), -1)  # Draw a blue circle at each point
@@ -67,7 +73,7 @@ def run():
                     idx += 1
                 
             if len(transformed_points) > 0:
-                # graph.add_edges(4)
+                graph.add_edges(4)
                 # graph.visualize_graph()
                 cv2.imshow('game items', img)
 

@@ -1,20 +1,24 @@
 import math
-import heapq
 from collections import defaultdict
 import networkx as nx
 import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
 from typing import Dict, List
 
+from graph_parts import Ball, Edge, Goal, Player
+from classification_maps import game_object_classification_names, edge_classification_ids
 
-def euclidean_distance(player1, player2):
-    x1, y1 = player1.x, player1.y
-    x2, y2 = player2.x, player2.y
-    distance = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+
+def euclidean_distance(player, target) -> float:
+    x1, y1 = player.x, player.y
+    x2, y2 = target.x, target.y
+    distance: float = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
     return distance
 
 
-def angle_to(x1, y1, x2, y2):
+def angle_to(player, target) -> float:
+    x1, y1 = player.x, player.y
+    x2, y2 = target.x, target.y
+
     # Calculate the differences in coordinates
     dx = x2 - x1
     dy = y2 - y1
@@ -30,71 +34,6 @@ def angle_to(x1, y1, x2, y2):
         angle_deg += 360
     
     return angle_deg
-
-
-class Player:
-    def __init__(self, idx, team, x, y):
-        self.id = int(idx)
-        self.team = team
-
-        self.x = float(x)
-        self.y = float(y)
-
-
-    def toString(self) -> str:
-        return f'(Player {self.id}: {self.team}; ({self.x}, {self.y}))'
-
-
-    def __str__(self) -> str:
-        return f'(Player {self.id}: {self.team}; ({self.x}, {self.y}))'
-
-
-class Goal:
-    def __init__(self, idx, side, x, y) -> None:
-        self.id = idx
-        self.side = side
-        self.x = x
-        self.y = y
-
-
-    def create_bounds():
-        pass
-
-
-    def __str__(self) -> str:
-        return f'({self.side} Goal ({self.x}, {self.y}))'
-
-
-class Ball:
-    def __init__(self, idx, x, y) -> None:
-        self.id = idx
-        self.x = x
-        self.y = y
-
-
-    def toString(self) -> str:
-        return f'(Ball: ({self.x}, {self.y}))'
-    
-
-    def __str__(self) -> str:
-        return f'(Ball: ({self.x}, {self.y}))'
-
-
-class Edge:
-    def __init__(self, idx, angle, type, player, target):
-        self.id = int(idx)
-        self.angle = angle
-        self.type = type # team to team, team to other team, team to goal, team to ball
-        self.player = player # player
-        self.target = target
-    
-
-    def create_feature_vector(self):
-        return [self.angle, self.target, self.type, self]
-
-
-    def __str__(self) -> str:
-        return f'(Edge: {self.id} {self.angle} {self.type}; {self.player} -> {self.target})'
 
 
 class Graph:
@@ -143,25 +82,26 @@ class Graph:
 
 
     def add_player(self, player):
-        if player.team == 'man_city':
+        print(player)
+        if game_object_classification_names[player.type] == 'man_city':
             self.man_city[player.id] = player
-        elif player.team == 'man_utd':
+        elif game_object_classification_names[player.type] == 'man_utd':
             self.man_utd[player.id] = player
 
 
     def add_gk(self, player):
-        if player.team[:-3] == 'man_city':
+        if game_object_classification_names[player.type] == 'man_city_gk':
             self.man_city_gk = [player]
-        elif player.team[:-3] == 'man_utd':
+        elif game_object_classification_names[player.type] == 'man_utd_utd':
             self.man_utd_gk = [player]
 
 
     def add_goal(self, goal):
         if self.goal:
-            if goal.side == self.goal[0].side:
-                if goal.side == "right":
+            if goal.type == self.goal[0].type:
+                if game_object_classification_names[goal.type] == "right_goal":
                     pass
-                elif goal.side == "left":
+                elif game_object_classification_names[goal.type] == "left_goal":
                     pass
         else:
             self.goal = [goal]
@@ -174,54 +114,62 @@ class Graph:
     def add_edges(self, degree):
         self.edges = defaultdict(list)  # resets edges
         idx = 0
-        # directed graph
-        for player in self.man_city.values():
-            for target in self.man_city.values():
-                idx += 1
-                if player.id != target.id:
-                    angle = angle_to(player.x, player.y, target.x, target.y)
-                    self.edges[player.id].append(Edge(idx, angle, 'team', player, target))
 
-        for player in self.man_city.values():
+        for player in self.man_city.values():  # edges between each of the players, going both ways
+            for target in self.man_city.values():
+                if player.id != target.id:
+                    angle = angle_to(player, target)
+                    distance = euclidean_distance(player, target)
+                    self.edges[player.id].append(Edge(idx, angle, distance, edge_classification_ids['team'], player, target))
+                    idx += 1
+
+        for player in self.man_city.values():  # edges between each man_city player and "degree" closest man_utd players
             distances = []
 
             for target in self.man_utd.values():
                 distance = euclidean_distance(player, target)
-                heapq.heappush(distances, (distance, target.id))
+                distances.append((distance, target))
 
-            for i in range(degree):
+            sorted_distances = sorted(distances, key=lambda x: x[0])
+            # print(sorted_distances)
+
+            for i in range(min(degree, len(sorted_distances))):
+                distance, target = sorted_distances[i]
+                angle = angle_to(player, target)
+                self.edges[player.id].append(Edge(idx, angle, distance, edge_classification_ids['opponent'], player, target))
                 idx += 1
-                closest_distance, target = heapq.heappop(distances)
-                angle = angle_to(player.x, player.y, self.man_utd[target].x, self.man_utd[target].y)
-                self.edges[player.id].append(Edge(idx, angle, 'opponent', player, self.man_utd[target]))
 
         if self.ball:
             distances = []
-
             ball = self.ball[0]
-                # find closest players to goal
-            for player in self.man_city.values():
+
+            for player in self.man_city.values():  # find closest man_city player to ba;;
                 distance = euclidean_distance(player, ball)
-                heapq.heappush(distances, (distance, ball))
+                distances.append((distance, player))
 
+            sorted_distances = sorted(distances, key=lambda x: x[0])
+
+            distance, player = sorted_distances[0]
+            angle = angle_to(player, ball)
+            self.edges[player.id].append(Edge(idx, angle, distance, edge_classification_ids['ball'], player, ball))
             idx += 1
-            closest_distance, ball = heapq.heappop(distances)
-            angle = angle_to(player.x, player.y, ball.x, ball.y)
-            self.edges[player.id].append(Edge(idx, angle, 'ball', player, ball))
 
-        if self.man_utd_gk:
+        if self.man_utd_gk:  # encode goalkeeper and goal into graph
             if self.goal:
+                distances = []
                 goal = self.goal[0]
-                # find closest players to goal
-                for player in self.man_city:
+
+                for player in self.man_city:  # find "degree" closest players to goal
                     distance = euclidean_distance(player, goal)
-                    heapq.heappush(distances, (distance, goal))
+                    distances.append((distance, player))
+
+                sorted_distances = sorted(distances, key=lambda x: x[0])
                 
-                for i in range(degree):
+                for i in range(min(degree, len(sorted_distances))):
+                    distance, player = sorted_distances[i]
+                    angle = angle_to(player, goal)
+                    self.edges[player.id].append(Edge(idx, angle, edge_classification_ids['goal'], player, goal))
                     idx += 1
-                    closest_distance, goal = heapq.heappop(distances)
-                    angle = angle_to(player.x, player.y, goal.x, goal.y)
-                    self.edges[player.id].append(Edge(idx, angle, 'goal', player, goal))
 
 
     def visualize_graph(self):
@@ -249,6 +197,7 @@ class Graph:
         pos = game_objects
         nx.draw(G, pos=pos, with_labels=True, node_color='lightblue', node_size=1000, font_size=12)
         plt.show()
+        # plt.close(fig)
 
 
     def __str__(self) -> str:

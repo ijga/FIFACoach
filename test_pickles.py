@@ -1,5 +1,5 @@
 import pickle
-from graph import Graph
+from graph_parts import Graph
 
 GAME = "1"
 ITER = "1"
