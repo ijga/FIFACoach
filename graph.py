@@ -77,14 +77,14 @@ class Graph:
         self.attacking_classification: int = 8
 
     def get_all_graph_objects(self) -> List[GameObject]:
-        all_game_objects = [
-            self.man_city.values() +
+        all_game_objects = (
+            list(self.man_city.values()) +
             self.man_city_gk +
-            self.man_utd.values() +
+            list(self.man_utd.values()) +
             self.man_utd_gk +
             self.goal +
             self.ball
-        ]
+        )
         return all_game_objects
 
     def get_all_edges(self) -> List[Edge]:

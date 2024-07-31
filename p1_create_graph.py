@@ -20,7 +20,7 @@ def run():
                 [-1.29464862e-15,  2.22727388e+00, -1.82615885e+02],
                 [-7.25486452e-19,  1.24457088e-03,  1.00000000e+00]])
 
-    with open(f"unlabeled_graphs/game{'5'}.pickle", "wb") as file:
+    with open(f"unlabeled_graphs/game{GAME}.pickle", "wb") as file:
         for idx, result in enumerate(results):
 
             confidence = result.boxes.conf.numpy()

@@ -12,5 +12,5 @@ with open(f"unlabeled_graphs/game{GAME}.pickle", "rb") as unlabeled:
 
             print(labeled_graph)
 
-            # print(f"{i}, {unlabeled_graph == labeled_graph}, {unlabeled_graph.attacking_classification}, {labeled_graph.attacking_classification}")
+            print(f"{i}, {unlabeled_graph == labeled_graph}, {unlabeled_graph.attacking_classification}, {labeled_graph.attacking_classification}")
             

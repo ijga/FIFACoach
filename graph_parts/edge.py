@@ -17,8 +17,8 @@ class Edge:
         # returns something in the form float, float, int], valid feature vector
         return f"{round(self.angle, 2)}, {round(self.distance, 2)}, {self.type}"
     
-    def create_sparse_adj_matrix_pair(self) -> str:
-        return f"{self.player.id}, {self.target.id}"
+    def create_sparse_adj_matrix_pair(self, nodes_from_prev_graphs) -> str:
+        return f"{self.player.id + nodes_from_prev_graphs}, {self.target.id + nodes_from_prev_graphs}"
 
     def toString(self) -> str:
         return f'(Edge: {self.id} {self.angle} {self.type}; {self.player.toString()} -> {self.target.toString()})'

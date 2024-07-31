@@ -8,24 +8,24 @@ n = total number of nodes
 m = total number of edges
 N = number of graphs
 
-(1) FIFAGS_edges.txt (m lines)
-sparse (block diagonal) adjacency matrix for all graphs,
-each line corresponds to (row, col) resp. (node_id, node_id)
+(1) FIFAGS_node_attributes.txt (n lines)
+matrix of node attributes,
+the comma seperated values in the i-th line is the attribute vector of the node with node_id as the value of the first element of the vector
 
 (2) FIFAGS_graph_indicator.txt (n lines)
 column vector of graph identifiers for all nodes of all graphs,
 the value in the i-th line is the graph_id of the node with node_id i
 
-(3) FIFAGS_graph_labels.txt (N lines)
-class labels for all graphs in the dataset,
-the value in the i-th line is the class label of the graph with graph_id i
+(3) FIFAGS_edges.txt (m lines)
+sparse (block diagonal) adjacency matrix for all graphs,
+each line corresponds to (row, col) resp. (node_id, node_id)
 
-(6) FIFAGS_edge_attributes.txt (m lines; same size as FIFAGS_A.txt)
+(4) FIFAGS_edge_attributes.txt (m lines; same size as FIFAGS_A.txt)
 attributes for the edges in FIFAGS_A.txt
 
-(7) FIFAGS_node_attributes.txt (n lines)
-matrix of node attributes,
-the comma seperated values in the i-th line is the attribute vector of the node with node_id i
+(5) FIFAGS_graph_labels.txt (N lines)
+class labels for all graphs in the dataset,
+the value in the i-th line is the class label of the graph with graph_id i
 
 === Description of the dataset ===
 
