@@ -61,6 +61,9 @@ def run():
                     elif game_object_type_name == 'left_goal' or game_object_type_name == 'right_goal':
                         graph.add_goal(Goal(idx, float(point[0]), float(point[1]), type))
 
+                    # in the future, only increment id if the game_object type is activly used in our graph
+                    idx += 1
+
                     if type == 4: # man_city
                         cv2.circle(img, (int(point[0]), int(point[1])), 3, (255, 0, 0), -1)  # Draw a blue circle at each point
                     elif type == 6: # man_utd
@@ -69,8 +72,6 @@ def run():
                         cv2.circle(img, (int(point[0]), int(point[1])), 3, (0, 140, 255), -1)  # Draw a orange circle at each point
                     else: # anything else
                         cv2.circle(img, (int(point[0]), int(point[1])), 3, (0, 255, 0), -1)  # Draw a green circle at each point
-                    
-                    idx += 1
                 
             if len(transformed_points) > 0:
                 graph.add_edges(4)

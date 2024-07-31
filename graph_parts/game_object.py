@@ -11,9 +11,9 @@ class GameObject:
     def get_position(self):
         return self.x, self.y
 
-    def create_feature_vector(self, nodes_from_prev_graphs) -> str:
+    def create_feature_vector(self) -> str:
         # returns something in the form [int, float, float, int], valid feature vector
-        return f"{self.id + nodes_from_prev_graphs}, {round(self.x, 2)}, {round(self.y, 2)}, {self.type}"
+        return f"{int(round(self.x))}, {int(round(self.y))}, {self.type}"
 
     def __eq__(self, other) -> bool:
         return self.id == other.id and self.x == other.x and self.y == other.y and self.type == other.type

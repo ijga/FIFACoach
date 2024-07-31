@@ -40,7 +40,8 @@ def angle_to(player: GameObject, target: GameObject) -> float:
 class Graph:
     """ A graph that represents the on-screen game state
     
-    This is a bidirectional graph where an edge represents the distance and angle that the destination has in relation to the souce
+    This is a bidirectional graph (between man_city players, all edges start from man_city_players) 
+    where an edge represents the distance and angle that the destination has in relation to the souce
 
     Attacking Classifications:
         1: Best scoring opportunity: shoot the ball now!
@@ -77,6 +78,20 @@ class Graph:
         self.attacking_classification: int = 8
 
     def get_all_graph_objects(self) -> List[GameObject]:
+        all_game_objects = sorted(
+                (
+                list(self.man_city.values()) +
+                self.man_city_gk +
+                list(self.man_utd.values()) +
+                self.man_utd_gk +
+                self.goal +
+                self.ball
+            ),
+            key=lambda x: x.id
+        )
+        return all_game_objects
+    
+    def is_not_empty(self) -> bool:
         all_game_objects = (
             list(self.man_city.values()) +
             self.man_city_gk +
@@ -85,7 +100,11 @@ class Graph:
             self.goal +
             self.ball
         )
-        return all_game_objects
+        return True if all_game_objects else False
+
+    def make_ids_continuous(self):
+        """Before making edges, iterate over all game objects, and reassign them continuous id numbers"""
+        pass
 
     def get_all_edges(self) -> List[Edge]:
         return [item for edge_list in self.edges.values() for item in edge_list]

@@ -10,7 +10,7 @@ N = number of graphs
 
 (1) FIFAGS_node_attributes.txt (n lines)
 matrix of node attributes,
-the comma seperated values in the i-th line is the attribute vector of the node with node_id as the value of the first element of the vector
+the comma seperated values in the i-th line is the attribute vector of the node with node_id as the value of the first element of the vector (do I need to make it so node_id is the line i?)
 
 (2) FIFAGS_graph_indicator.txt (n lines)
 column vector of graph identifiers for all nodes of all graphs,
