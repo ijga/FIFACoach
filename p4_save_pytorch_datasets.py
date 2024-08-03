@@ -49,8 +49,8 @@ class FIFAGSDataset(InMemoryDataset):
         edge_attributes = torch.tensor(np.loadtxt(self.raw_paths[0], delimiter=",", dtype=int, ndmin=2), dtype=torch.int)
         edges = torch.tensor(np.loadtxt(self.raw_paths[1], delimiter=",", dtype=int, ndmin=2), dtype=torch.int)
         graph_indicator = torch.tensor(np.loadtxt(self.raw_paths[2], delimiter=",", dtype=int, ndmin=1), dtype=torch.int)
-        graph_labels = torch.tensor(np.loadtxt(self.raw_paths[3], delimiter=",", dtype=int, ndmin=1), dtype=torch.int)
-        node_attributes = torch.tensor(np.loadtxt(self.raw_paths[4], delimiter=",", dtype=int, ndmin=2), dtype=torch.int)
+        graph_labels = torch.tensor(np.loadtxt(self.raw_paths[3], delimiter=",", dtype=int, ndmin=1), dtype=torch.long)
+        node_attributes = torch.tensor(np.loadtxt(self.raw_paths[4], delimiter=",", dtype=int, ndmin=2), dtype=torch.float)
 
         data_list = []
 
