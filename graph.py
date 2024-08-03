@@ -1,7 +1,5 @@
 import math
 from collections import defaultdict
-import networkx as nx
-import matplotlib.pyplot as plt
 from typing import Dict, List
 
 from graph_parts import Ball, Edge, Goal, Player
@@ -198,33 +196,6 @@ class Graph:
                     angle = angle_to(player, goal)
                     self.edges[player.id].append(Edge(idx, angle, edge_classification_ids['goal'], player, goal))
                     idx += 1
-
-    def visualize_graph(self):
-        G = nx.Graph()
-
-        city = {player.id: (player.x, -1 * player.y) for player in self.man_city.values()}
-        utd = {player.id: (player.x, -1 * player.y) for player in self.man_utd.values()}
-        ball = {ball.id: (ball.x, -1 * ball.y) for ball in self.ball}
-        game_objects = {**city, **utd, **ball}
-        if self.man_city_gk:
-            gk = self.man_city_gk[0]
-            game_objects.update({gk.id: (gk.x, -1 * gk.y)})
-        elif self.man_utd_gk:
-            gk = self.man_utd_gk[0]
-            game_objects.update({gk.id: (gk.x, -1 * gk.y)})
-
-        for vertex in game_objects:
-            G.add_node(vertex)
-
-        for src, edges in self.edges.items():
-            for edge in edges:
-                G.add_edge(src, edge.target.id)
-
-        fig, ax = plt.subplots()
-        pos = game_objects
-        nx.draw(G, pos=pos, with_labels=True, node_color='lightblue', node_size=1000, font_size=12)
-        plt.show()
-        # plt.close(fig)
 
     def __str__(self) -> str:
         return f"Graph: {self.attacking_classification}"

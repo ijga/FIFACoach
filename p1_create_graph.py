@@ -75,11 +75,10 @@ def run():
                 
             if len(transformed_points) > 0:
                 graph.add_edges(4)
-                # graph.visualize_graph()
                 cv2.imshow('game items', img)
 
             # write graph and image to pkl file
-            pickle.dump(graph, file)
+            # pickle.dump(graph, file)
             
 
     cv2.destroyAllWindows()
